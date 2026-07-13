@@ -5,10 +5,18 @@ export interface ScrapingResult {
   screenshot: Uint8Array;
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function scraper(page: Page, profileUrl: string): Promise<ScrapingResult> {
-  await page.goto(profileUrl, { waitUntil: "networkidle2" });
+  await page.goto(profileUrl, { waitUntil: "networkidle2", timeout: 60000 });
 
   await page.setViewport({ width: 1920, height: 1080 });
+
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
+  await sleep(3000);
 
   const maxAttempts = 50;
   let attempts = 0;
@@ -16,7 +24,25 @@ export async function scraper(page: Page, profileUrl: string): Promise<ScrapingR
   while (attempts < maxAttempts) {
     attempts++;
 
-    const showMoreButton = await page.$('button:has-text("Show More"), button:has-text("show more"), .load-more, [data-testid*="load-more"], [aria-label*="more"]');
+    const buttons = await page.$$('button, [role="button"], .gig-card-actions button');
+    let showMoreButton = null;
+
+    for (const button of buttons) {
+      try {
+        const text = await button.evaluate((btn: any) => btn.textContent?.toLowerCase() || "");
+        const className = await button.evaluate((btn: any) => btn.className?.toLowerCase() || "");
+        const ariaLabel = await button.evaluate((btn: any) => btn.getAttribute("aria-label")?.toLowerCase() || "");
+        
+        if (text.includes("show more") || text.includes("show all") || text.includes("load more") || 
+            className.includes("show-more") || className.includes("load-more") ||
+            ariaLabel.includes("show more") || ariaLabel.includes("load more")) {
+          showMoreButton = button;
+          break;
+        }
+      } catch (e) {
+        continue;
+      }
+    }
 
     if (!showMoreButton) {
       break;
@@ -27,7 +53,7 @@ export async function scraper(page: Page, profileUrl: string): Promise<ScrapingR
       const rect = btn.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return false;
       const style = window.getComputedStyle(btn);
-      return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0";
+      return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0" && rect.top >= 0;
     }, showMoreButton);
 
     if (!isVisible) {
@@ -38,21 +64,28 @@ export async function scraper(page: Page, profileUrl: string): Promise<ScrapingR
       btn.scrollIntoView({ behavior: "smooth", block: "center" });
     }, showMoreButton);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await sleep(500);
 
-    await showMoreButton.click();
+    await showMoreButton.click().catch(() => {});
 
-    await page.waitForTimeout(2000);
+    await sleep(2000);
 
     await page.evaluate(() => {
       return new Promise((resolve) => {
         let lastHeight = 0;
+        let stableCount = 0;
         const checkHeight = () => {
           const height = document.body.scrollHeight;
           if (height === lastHeight) {
-            resolve(height);
+            stableCount++;
+            if (stableCount >= 2) {
+              resolve(height);
+            } else {
+              setTimeout(checkHeight, 500);
+            }
           } else {
             lastHeight = height;
+            stableCount = 0;
             setTimeout(checkHeight, 500);
           }
         };
@@ -60,8 +93,14 @@ export async function scraper(page: Page, profileUrl: string): Promise<ScrapingR
       });
     });
 
-    await page.waitForTimeout(1000);
+    await sleep(1000);
   }
+
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
+
+  await sleep(1000);
 
   const html = await page.content();
 

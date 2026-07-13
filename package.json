@@ -12,7 +12,14 @@
     "type": "git",
     "url": "git+https://github.com/themeix/fiverr-anaylysis.git"
   },
-  "keywords": ["cloudflare", "workers", "browser-rendering", "fiverr", "scraping", "puppeteer"],
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "browser-rendering",
+    "fiverr",
+    "scraping",
+    "puppeteer"
+  ],
   "author": "",
   "license": "MIT",
   "bugs": {
@@ -26,7 +33,7 @@
     "wrangler": "^4.110.0"
   },
   "dependencies": {
-    "hono": "^4.6.14",
-    "puppeteer-core": "^23.11.1"
+    "@cloudflare/puppeteer": "^1.1.0",
+    "hono": "^4.6.14"
   }
 }

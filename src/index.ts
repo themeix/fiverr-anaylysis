@@ -1,3 +1,4 @@
+import puppeteer from "@cloudflare/puppeteer";
 import { scraper } from "./scraper";
 import { extractor } from "./extractor";
 import { saveFiles } from "./utils";
@@ -10,11 +11,12 @@ export default {
     const profileUrl = url.searchParams.get("url") || "https://www.fiverr.com/dev_pioneer";
 
     try {
-      const page = await env.MYBROWSER.newPage();
+      const browser = await puppeteer.launch(env.MYBROWSER);
+      const page = await browser.newPage();
 
       const result = await scraper(page, profileUrl);
 
-      await page.close();
+      await browser.close();
 
       const reviews = extractor(result.html);
 
