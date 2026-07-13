@@ -58,77 +58,44 @@ A Cloudflare Worker that uses **Cloudflare Browser Rendering** (headless Chromiu
 
 ## Requirements
 
-- Cloudflare Account
-- Workers Paid Plan (Browser Rendering enabled)
+- Cloudflare Account with Workers Paid Plan (for Browser Rendering)
 - Wrangler CLI
 - Node.js 20+
 
----
+## Setup Instructions
 
-## Installation
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourname/fiverr-review-extractor.git
+   cd fiverr-review-extractor
+   ```
 
-Clone the repository.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```bash
-git clone https://github.com/yourname/fiverr-review-extractor.git
+3. **Configure Wrangler**
+   ```bash
+   wrangler login
+   ```
 
-cd fiverr-review-extractor
-```
+4. **Create R2 bucket**
+   ```bash
+   npx wrangler r2 bucket create fiverr-screenshots
+   ```
 
-Install dependencies.
+5. **Generate TypeScript types**
+   ```bash
+   npx wrangler types
+   ```
 
-```bash
-npm install
-```
+6. **Deploy to Cloudflare**
+   ```bash
+   npx wrangler deploy
+   ```
 
----
-
-## Configure Browser Rendering
-
-Add a Browser Rendering binding.
-
-### wrangler.jsonc
-
-```json
-{
-  "browser": {
-    "binding": "MYBROWSER"
-  }
-}
-```
-
-If using R2:
-
-```json
-{
-  "r2_buckets": [
-    {
-      "binding": "FILES",
-      "bucket_name": "screenshots"
-    }
-  ]
-}
-```
-
----
-
-## Run Locally
-
-```bash
-wrangler dev
-```
-
----
-
-## Deploy
-
-```bash
-wrangler deploy
-```
-
----
-
-# Usage
+## Usage
 
 Example request:
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fiverr-review-extractor",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "browser": {
+    "binding": "MYBROWSER"
+  },
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "fiverr-screenshots"
+    }
+  ]
+}
