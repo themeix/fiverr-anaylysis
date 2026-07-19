@@ -1,8 +1,8 @@
-node_modules/
-.wrangler/
-dist/
-.env
-.dev.vars
-*.log
+node_modules
+dist
+profiles/chrome/*
+!profiles/chrome/.gitkeep
+output/*
+!output/.gitkeep
+progress.json
 .DS_Store
-worker-configuration.d.ts

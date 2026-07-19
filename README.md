@@ -1,228 +1,86 @@
-# Fiverr Profile Review Extractor using Cloudflare Browser Rendering
+# Fiverr Review Collector
 
-A Cloudflare Worker that uses **Cloudflare Browser Rendering** (headless Chromium) to automatically load every review from a Fiverr seller profile, capture a full-page screenshot, save the rendered HTML, and optionally export all reviews as structured JSON or Excel.
-
----
+A Node.js/TypeScript tool for collecting reviews from Fiverr in buyer and seller modes.
 
 ## Features
 
-- 🚀 Uses Cloudflare Browser Rendering (no external browser required)
-- 📜 Automatically loads **all reviews**
-- 🔄 Clicks **"Show More Reviews"** until no more reviews are available
-- 📸 Captures a full-page screenshot
-- 📄 Saves the fully rendered HTML
-- 📦 Extracts all review data into JSON
-- 📊 Optional Excel (.xlsx) export
-- ☁️ Can upload screenshots, HTML, and JSON directly to Cloudflare R2
+- **Buyer Mode**: Collect reviews from freelancers about buyers
+- **Seller Mode**: Collect reviews from buyers about sellers
+- Persistent Chrome profile (log in once, reuse session)
+- Random delays for human-like behavior
+- Automatic retry logic
+- Resume support via progress tracking
+- Export to Excel and JSON
 
----
+## Installation
 
-## How it Works
+```bash
+npm install
+```
 
-1. Launch a headless Chromium browser.
-2. Open the Fiverr seller profile.
-3. Navigate to the Reviews section.
-4. Continuously:
-   - Scroll to the bottom.
-   - Detect the **Show More Reviews** button.
-   - Click the button.
-   - Wait until network activity is idle.
-   - Repeat until no additional reviews exist.
-5. Wait for all lazy-loaded content to finish rendering.
-6. Capture a full-page screenshot.
-7. Save the rendered HTML.
-8. Extract all reviews.
-9. Return or upload the generated files.
+## Usage
 
----
+### Buyer Reviews
+
+Collect reviews from freelancers about a buyer:
+
+```bash
+npm run buyer username1 username2 username3
+```
+
+Example:
+```bash
+npm run buyer wilsonlovato55
+```
+
+### Seller Reviews
+
+Collect reviews from buyers about a seller:
+
+```bash
+npm run seller username1 username2 username3
+```
+
+Example:
+```bash
+npm run seller betopia
+```
 
 ## Project Structure
 
 ```
-.
-├── src/
-│   ├── index.ts
-│   ├── browser.ts
-│   ├── scraper.ts
-│   ├── extractor.ts
-│   ├── excel.ts
-│   └── utils.ts
-│
-├── wrangler.jsonc
-├── package.json
-├── tsconfig.json
-└── README.md
+src/
+├── browser/        # Browser management
+├── buyer/          # Buyer scraping logic
+├── seller/         # Seller scraping logic
+├── extractors/     # Review extraction
+├── exporters/      # Excel and JSON export
+├── utils/          # Utilities (delay, retry, logger, progress)
+└── types/          # TypeScript types
 ```
-
----
-
-## Requirements
-
-- Cloudflare Account with Workers Paid Plan (for Browser Rendering)
-- Wrangler CLI
-- Node.js 20+
-
-## Setup Instructions
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourname/fiverr-review-extractor.git
-   cd fiverr-review-extractor
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Wrangler**
-   ```bash
-   wrangler login
-   ```
-
-4. **Create R2 bucket**
-   ```bash
-   npx wrangler r2 bucket create fiverr-screenshots
-   ```
-
-5. **Generate TypeScript types**
-   ```bash
-   npx wrangler types
-   ```
-
-6. **Deploy to Cloudflare**
-   ```bash
-   npx wrangler deploy
-   ```
-
-## Usage
-
-Example request:
-
-```
-GET /?url=https://www.fiverr.com/username
-```
-
-Response:
-
-```json
-{
-    "success": true,
-    "reviews": 387,
-    "screenshot": "...",
-    "html": "...",
-    "json": "..."
-}
-```
-
----
-
-## Scraping Algorithm
-
-```
-Open Profile
-        │
-        ▼
-Scroll to Reviews
-        │
-        ▼
-Find "Show More Reviews"
-        │
-        ├── Found
-        │      │
-        │      ▼
-        │   Click Button
-        │      │
-        │      ▼
-        │ Wait for Network Idle
-        │      │
-        │      ▼
-        │ Repeat
-        │
-        └── Not Found
-               │
-               ▼
-Capture Screenshot
-               │
-               ▼
-Save HTML
-               │
-               ▼
-Extract Reviews
-               │
-               ▼
-Generate Excel
-```
-
----
 
 ## Output Files
 
-After completion the worker can generate:
+- `output/reviews.xlsx` - Excel export
+- `output/reviews.json` - JSON export
+- `progress.json` - Progress tracking
 
-```
-output/
+## Development Guidelines
 
-reviews.png
+- Uses Playwright Locators for robust element selection
+- Implements random delays to mimic human behavior
+- Supports resuming from last processed profile
+- No automatic login - user logs in manually once
 
-reviews.html
+## Requirements
 
-reviews.json
+- Node.js 18+
+- TypeScript 5+
+- Google Chrome
 
-reviews.xlsx
-```
+## Notes
 
----
-
-## Review Data Structure
-
-```json
-{
-    "name": "John Doe",
-    "country": "United States",
-    "rating": 5,
-    "date": "2 weeks ago",
-    "price": "$200-$400",
-    "duration": "7 days",
-    "gig": "Shopify",
-    "review": "Amazing experience..."
-}
-```
-
----
-
-## Export Formats
-
-- JSON
-- HTML
-- PNG Screenshot
-- XLSX
-
----
-
-## Recommended Improvements
-
-- Automatic retry on failed clicks
-- Infinite scrolling detection
-- CAPTCHA detection
-- Cookie persistence
-- Browser session reuse
-- Parallel profile processing
-- Queue support
-- Scheduled scraping
-- R2 storage
-- D1 database integration
-- CSV export
-- Google Sheets export
-
----
-
-## Disclaimer
-
-This project is intended for educational purposes and for scraping publicly available information. Always review Fiverr's Terms of Service and robots.txt before automating access to their website. Use responsibly and respect rate limits.
-
----
-
-## License
-
-MIT
+- First run: You'll need to log in to Fiverr manually in the browser
+- The browser will open in headed mode
+- Progress is saved automatically and can be resumed
+- Duplicate reviews are filtered out automatically

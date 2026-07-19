@@ -1,39 +1,24 @@
 {
-  "name": "fiverr-anaylysis",
+  "name": "fiverr-review-collector",
   "version": "1.0.0",
-  "description": "A Cloudflare Worker that uses **Cloudflare Browser Rendering** (headless Chromium) to automatically load every review from a Fiverr seller profile, capture a full-page screenshot, save the rendered HTML, and optionally export all reviews as structured JSON or Excel.",
-  "main": "src/index.ts",
+  "description": "Collect reviews from Fiverr in buyer and seller modes",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "types": "wrangler types"
+    "buyer": "tsx src/index.ts buyer",
+    "seller": "tsx src/index.ts seller",
+    "build": "tsc"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/themeix/fiverr-anaylysis.git"
-  },
-  "keywords": [
-    "cloudflare",
-    "workers",
-    "browser-rendering",
-    "fiverr",
-    "scraping",
-    "puppeteer"
-  ],
+  "keywords": ["fiverr", "reviews", "scraper", "playwright"],
   "author": "",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/themeix/fiverr-anaylysis/issues"
-  },
-  "homepage": "https://github.com/themeix/fiverr-anaylysis#readme",
   "devDependencies": {
-    "@types/node": "^22.10.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
-    "wrangler": "^4.110.0"
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
   },
   "dependencies": {
-    "@cloudflare/puppeteer": "^1.1.0",
-    "hono": "^4.6.14"
+    "playwright": "^1.40.0",
+    "exceljs": "^4.4.0"
   }
 }
